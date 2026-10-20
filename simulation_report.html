@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RL Adaptive Routing Protocol - Benchmark Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-emerald: #34d399;
+            --accent-rose: #fb7185;
+            --accent-amber: #fbbf24;
+            --accent-purple: #c084fc;
+            --border-color: #475569;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-primary); padding: 24px; line-height: 1.5; }
+        header { margin-bottom: 28px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        h1 { font-size: 2rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 8px; }
+        p.subtitle { color: var(--text-secondary); font-size: 1.05rem; }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; background: #0369a1; color: #e0f2fe; margin-right: 8px; }
+        
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .card { background: var(--bg-secondary); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+        .card-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px; }
+        .card-value { font-size: 1.8rem; font-weight: 700; color: var(--accent-emerald); }
+        .card-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+
+        .section-title { font-size: 1.3rem; margin: 28px 0 16px 0; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
+        .section-title::before { content: ''; display: inline-block; width: 4px; height: 1.2rem; background: var(--accent-blue); border-radius: 2px; }
+
+        table { width: 100%; border-collapse: collapse; background: var(--bg-secondary); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: #182234; font-weight: 600; color: var(--accent-blue); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        tr:hover { background: rgba(56, 189, 248, 0.05); }
+        .winner { color: var(--accent-emerald); font-weight: bold; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .chart-box { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+        .chart-header { font-weight: 600; margin-bottom: 16px; color: var(--text-primary); font-size: 1rem; }
+        canvas { width: 100%; height: 260px; }
+
+        .details-pre { background: #090d16; padding: 16px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow-x: auto; color: #38bdf8; max-height: 350px; border: 1px solid var(--border-color); }
+        footer { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+                <h1>Adaptive Routing Protocol Benchmark</h1>
+                <p class="subtitle">Multi-Agent Reinforcement Learning vs. Traditional Routing Protocols</p>
+            </div>
+            <div>
+                <span class="badge">Topology: nsfnet</span>
+                <span class="badge" style="background:#047857;">DES Simulator</span>
+                <span class="badge" style="background:#6d28d9;">Q-Routing</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid-cards">
+        <div class="card">
+            <div class="card-title">Top Protocol (Latency)</div>
+            <div class="card-value" id="bestLatencyProtocol">-</div>
+            <div class="card-desc" id="bestLatencyValue">Lowest end-to-end delivery time</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Top Protocol (PDR)</div>
+            <div class="card-value" id="bestPdrProtocol" style="color:var(--accent-blue);">-</div>
+            <div class="card-desc" id="bestPdrValue">Highest packet delivery percentage</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Max Throughput</div>
+            <div class="card-value" id="bestTpProtocol" style="color:var(--accent-amber);">-</div>
+            <div class="card-desc" id="bestTpValue">Packets delivered per second</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Simulated Packets</div>
+            <div class="card-value" style="color:var(--accent-purple);" id="totalPacketsCount">-</div>
+            <div class="card-desc">Total traffic load tested</div>
+        </div>
+    </div>
+
+    <div class="section-title">Comparative Performance Summary</div>
+    <table id="summaryTable">
+        <thead>
+            <tr>
+                <th>Protocol</th>
+                <th>Avg Latency (s)</th>
+                <th>Packet Delivery Ratio (PDR)</th>
+                <th>Throughput (pps)</th>
+                <th>Packets Dropped</th>
+                <th>Avg Hop Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Populated by JS -->
+        </tbody>
+    </table>
+
+    <div class="section-title">Visual Performance Metrics</div>
+    <div class="charts-grid">
+        <div class="chart-box">
+            <div class="chart-header">Average Latency Comparison (Lower is Better)</div>
+            <canvas id="chartLatency"></canvas>
+        </div>
+        <div class="chart-box">
+            <div class="chart-header">Packet Delivery Ratio % (Higher is Better)</div>
+            <canvas id="chartPDR"></canvas>
+        </div>
+        <div class="chart-box">
+            <div class="chart-header">Throughput - Packets/Sec (Higher is Better)</div>
+            <canvas id="chartThroughput"></canvas>
+        </div>
+        <div class="chart-box">
+            <div class="chart-header">Buffer Drops & Packet Loss (Lower is Better)</div>
+            <canvas id="chartDrops"></canvas>
+        </div>
+    </div>
+
+    <div class="section-title">Raw Simulation Data (JSON)</div>
+    <pre class="details-pre" id="jsonViewer"></pre>
+
+    <footer>
+        <p>Reinforcement Learning Adaptive Routing Protocol Project &bull; Discrete Event Simulation Engine &bull; Pure Python Architecture</p>
+    </footer>
+
+    <script>
+        const results = {
+  "Dual-Q-Routing": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 34,
+      "packets_delivered": 31,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 91.18,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.5102,
+      "std_latency_s": 0.5108,
+      "average_hops": 4.42,
+      "throughput_pps": 6.2,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.1933,
+      0.5221,
+      0.561,
+      0.5839,
+      0.5102
+    ],
+    "history_pdr": [
+      14.29,
+      72.73,
+      73.33,
+      92.0,
+      91.18
+    ],
+    "history_throughput": [
+      1.0,
+      4.0,
+      3.67,
+      5.75,
+      6.2
+    ]
+  },
+  "Q-Routing": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 24,
+      "packets_delivered": 21,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 87.5,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.542,
+      "std_latency_s": 0.649,
+      "average_hops": 3.24,
+      "throughput_pps": 4.2,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.0,
+    "history_latency": [
+      0.145,
+      0.2739,
+      0.526,
+      0.5894,
+      0.542
+    ],
+    "history_pdr": [
+      40.0,
+      60.0,
+      75.0,
+      90.0,
+      87.5
+    ],
+    "history_throughput": [
+      2.0,
+      3.0,
+      4.0,
+      4.5,
+      4.2
+    ]
+  },
+  "Congestion-Aware": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 33,
+      "packets_delivered": 30,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 90.91,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.4203,
+      "std_latency_s": 0.4708,
+      "average_hops": 2.37,
+      "throughput_pps": 6.0,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.2175,
+      0.2041,
+      0.4499,
+      0.4404,
+      0.4203
+    ],
+    "history_pdr": [
+      66.67,
+      64.29,
+      82.61,
+      92.86,
+      90.91
+    ],
+    "history_throughput": [
+      4.0,
+      4.5,
+      6.33,
+      6.5,
+      6.0
+    ]
+  },
+  "Dijkstra-SPF": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 25,
+      "packets_delivered": 23,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 92.0,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.314,
+      "std_latency_s": 0.2086,
+      "average_hops": 2.48,
+      "throughput_pps": 4.6,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.2393,
+      0.2397,
+      0.2467,
+      0.3292,
+      0.314
+    ],
+    "history_pdr": [
+      100.0,
+      100.0,
+      78.95,
+      90.48,
+      92.0
+    ],
+    "history_throughput": [
+      9.0,
+      5.5,
+      5.0,
+      4.75,
+      4.6
+    ]
+  },
+  "Random-Walk": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 25,
+      "packets_delivered": 22,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 88.0,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.7033,
+      "std_latency_s": 0.9169,
+      "average_hops": 5.0,
+      "throughput_pps": 4.4,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.0,
+    "history_latency": [
+      0.4086,
+      0.4755,
+      0.4634,
+      0.577,
+      0.7033
+    ],
+    "history_pdr": [
+      50.0,
+      66.67,
+      73.33,
+      90.48,
+      88.0
+    ],
+    "history_throughput": [
+      2.0,
+      4.0,
+      3.67,
+      4.75,
+      4.4
+    ]
+  }
+};
+        document.getElementById('jsonViewer').textContent = JSON.stringify(results, null, 2);
+
+        const protocols = Object.keys(results);
+        const tbody = document.querySelector('#summaryTable tbody');
+
+        let minLat = Infinity, bestLatProto = '';
+        let maxPdr = -1, bestPdrProto = '';
+        let maxTp = -1, bestTpProto = '';
+        let totalPkts = 0;
+
+        protocols.forEach(p => {
+            const s = results[p].summary;
+            totalPkts = Math.max(totalPkts, s.packets_generated);
+
+            if (s.average_latency_s > 0 && s.average_latency_s < minLat) {
+                minLat = s.average_latency_s;
+                bestLatProto = p;
+            }
+            if (s.packet_delivery_ratio_pct > maxPdr) {
+                maxPdr = s.packet_delivery_ratio_pct;
+                bestPdrProto = p;
+            }
+            if (s.throughput_pps > maxTp) {
+                maxTp = s.throughput_pps;
+                bestTpProto = p;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p}</strong></td>
+                <td>${s.average_latency_s.toFixed(4)} s</td>
+                <td>${s.packet_delivery_ratio_pct.toFixed(2)}%</td>
+                <td>${s.throughput_pps.toFixed(2)} pps</td>
+                <td>${s.packets_dropped}</td>
+                <td>${s.average_hops.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('bestLatencyProtocol').textContent = bestLatProto;
+        document.getElementById('bestLatencyValue').textContent = `${minLat.toFixed(4)} s average latency`;
+        document.getElementById('bestPdrProtocol').textContent = bestPdrProto;
+        document.getElementById('bestPdrValue').textContent = `${maxPdr.toFixed(2)}% delivery ratio`;
+        document.getElementById('bestTpProtocol').textContent = bestTpProto;
+        document.getElementById('bestTpValue').textContent = `${maxTp.toFixed(2)} packets / sec`;
+        document.getElementById('totalPacketsCount').textContent = totalPkts.toLocaleString();
+
+        // Native HTML5 Canvas Bar Chart Renderer
+        function drawBarChart(canvasId, labels, values, color, suffix = '', higherIsBetter = true) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = rect.height;
+            const padding = { top: 20, right: 30, bottom: 40, left: 60 };
+            const chartW = w - padding.left - padding.right;
+            const chartH = h - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const maxVal = Math.max(...values) * 1.15 || 1.0;
+            const barWidth = chartW / labels.length * 0.55;
+            const gap = chartW / labels.length;
+
+            // Gridlines
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+
+                const val = maxVal * (1 - i / 4);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '11px Segoe UI, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(val.toFixed(2), padding.left - 8, y + 4);
+            }
+
+            // Bars
+            labels.forEach((label, i) => {
+                const val = values[i];
+                const barH = (val / maxVal) * chartH;
+                const x = padding.left + i * gap + (gap - barWidth) / 2;
+                const y = padding.top + chartH - barH;
+
+                // Gradient
+                const grad = ctx.createLinearGradient(0, y, 0, y + barH);
+                grad.addColorStop(0, color);
+                grad.addColorStop(1, '#0f172a');
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(x, y, barWidth, barH);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(x, y, barWidth, barH);
+
+                // Value on top
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = 'bold 11px Segoe UI, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(val.toFixed(2) + suffix, x + barWidth / 2, y - 6);
+
+                // X-Axis Label
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '12px Segoe UI, sans-serif';
+                ctx.fillText(label, x + barWidth / 2, h - padding.bottom + 20);
+            });
+        }
+
+        // Render all charts
+        const pNames = protocols;
+        drawBarChart('chartLatency', pNames, [0.5102, 0.542, 0.4203, 0.314, 0.7033], '#38bdf8', 's', false);
+        drawBarChart('chartPDR', pNames, [91.18, 87.5, 90.91, 92.0, 88.0], '#34d399', '%', true);
+        drawBarChart('chartThroughput', pNames, [6.2, 4.2, 6.0, 4.6, 4.4], '#fbbf24', ' pps', true);
+        drawBarChart('chartDrops', pNames, [0, 0, 0, 0, 0], '#fb7185', '', false);
+
+        window.addEventListener('resize', () => {
+            drawBarChart('chartLatency', pNames, [0.5102, 0.542, 0.4203, 0.314, 0.7033], '#38bdf8', 's', false);
+            drawBarChart('chartPDR', pNames, [91.18, 87.5, 90.91, 92.0, 88.0], '#34d399', '%', true);
+            drawBarChart('chartThroughput', pNames, [6.2, 4.2, 6.0, 4.6, 4.4], '#fbbf24', ' pps', true);
+            drawBarChart('chartDrops', pNames, [0, 0, 0, 0, 0], '#fb7185', '', false);
+        });
+    </script>
+</body>
+</html>

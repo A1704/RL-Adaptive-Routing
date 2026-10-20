@@ -1,0 +1,8 @@
+# Reinforcement Learning based Adaptive Routing Protocol
+# Note: The core simulation engine, MARL Q-routing agents, baselines,
+# desktop Tkinter GUI, and HTML dashboard use 100% Python standard libraries
+# (math, random, heapq, tkinter, json, time, dataclasses, unittest).
+#
+# No external dependencies or C-extension DLLs are required to run the complete project!
+# Python 3.10+ recommended.
+

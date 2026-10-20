@@ -1,0 +1,187 @@
+{
+  "Dual-Q-Routing": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 34,
+      "packets_delivered": 31,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 91.18,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.5102,
+      "std_latency_s": 0.5108,
+      "average_hops": 4.42,
+      "throughput_pps": 6.2,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.1933,
+      0.5221,
+      0.561,
+      0.5839,
+      0.5102
+    ],
+    "history_pdr": [
+      14.29,
+      72.73,
+      73.33,
+      92.0,
+      91.18
+    ],
+    "history_throughput": [
+      1.0,
+      4.0,
+      3.67,
+      5.75,
+      6.2
+    ]
+  },
+  "Q-Routing": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 24,
+      "packets_delivered": 21,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 87.5,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.542,
+      "std_latency_s": 0.649,
+      "average_hops": 3.24,
+      "throughput_pps": 4.2,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.0,
+    "history_latency": [
+      0.145,
+      0.2739,
+      0.526,
+      0.5894,
+      0.542
+    ],
+    "history_pdr": [
+      40.0,
+      60.0,
+      75.0,
+      90.0,
+      87.5
+    ],
+    "history_throughput": [
+      2.0,
+      3.0,
+      4.0,
+      4.5,
+      4.2
+    ]
+  },
+  "Congestion-Aware": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 33,
+      "packets_delivered": 30,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 90.91,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.4203,
+      "std_latency_s": 0.4708,
+      "average_hops": 2.37,
+      "throughput_pps": 6.0,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.2175,
+      0.2041,
+      0.4499,
+      0.4404,
+      0.4203
+    ],
+    "history_pdr": [
+      66.67,
+      64.29,
+      82.61,
+      92.86,
+      90.91
+    ],
+    "history_throughput": [
+      4.0,
+      4.5,
+      6.33,
+      6.5,
+      6.0
+    ]
+  },
+  "Dijkstra-SPF": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 25,
+      "packets_delivered": 23,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 92.0,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.314,
+      "std_latency_s": 0.2086,
+      "average_hops": 2.48,
+      "throughput_pps": 4.6,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.01,
+    "history_latency": [
+      0.2393,
+      0.2397,
+      0.2467,
+      0.3292,
+      0.314
+    ],
+    "history_pdr": [
+      100.0,
+      100.0,
+      78.95,
+      90.48,
+      92.0
+    ],
+    "history_throughput": [
+      9.0,
+      5.5,
+      5.0,
+      4.75,
+      4.6
+    ]
+  },
+  "Random-Walk": {
+    "summary": {
+      "simulation_time": 5.0,
+      "packets_generated": 25,
+      "packets_delivered": 22,
+      "packets_dropped": 0,
+      "packet_delivery_ratio_pct": 88.0,
+      "drop_rate_pct": 0.0,
+      "average_latency_s": 0.7033,
+      "std_latency_s": 0.9169,
+      "average_hops": 5.0,
+      "throughput_pps": 4.4,
+      "drop_reasons": {}
+    },
+    "wall_time_s": 0.0,
+    "history_latency": [
+      0.4086,
+      0.4755,
+      0.4634,
+      0.577,
+      0.7033
+    ],
+    "history_pdr": [
+      50.0,
+      66.67,
+      73.33,
+      90.48,
+      88.0
+    ],
+    "history_throughput": [
+      2.0,
+      4.0,
+      3.67,
+      4.75,
+      4.4
+    ]
+  }
+}
